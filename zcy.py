@@ -71,7 +71,8 @@ class AprilTagDetector:
             # tag.corners：一个包含 4 个坐标点的小矩阵，代表这个标签在画面里的左下、右下、右上、左上四个角点的准确像素坐标。
             # tag.center：标签中心点的准确像素坐标。
             for tag in tags:
-                self.draw_bounding_box(frame, tag)  # 为所有二维码打框 (在原彩色图上画绿色方框)、
+                self.draw_bounding_box(frame, tag)  # 为所有二维码打框 (在原彩色图上画绿色方框)
+
             # 返回一个列表，里面打包了：(这颗标签的坐标偏移量, 标签本体信息)
             return [(self.calculate_offset(frame.shape, tag), tag) for tag in tags] 
         return [] # 如果什么都没找到，返回空列表
@@ -84,7 +85,7 @@ class AprilTagDetector:
     def calculate_offset(self, frame_shape, tag):
         """计算二维码中心与图像中心的偏移量"""
         frame_center = np.array([frame_shape[1] // 2, frame_shape[0] // 2])  # 画面中心：宽度的一半，高度的一半
-        tag_center = np.mean(tag.corners, axis=0).astype(int)   # 标签中心：求 4 个角点坐标的平均值
+        tag_center = tag.center.astype(int)
         offset = tag_center - frame_center        
         return int(offset[0]), int(offset[1])
 
@@ -124,7 +125,7 @@ class AprilTagDetector:
 
 
 
-### 这个线程输出 全局变量 enemy_flag 和 current_enemy_offset和current_enemy_area
+### 这个线程输出 全局变量 enemy_flag 和 current_enemy_offset和 current_enemy_area
 
 # 在函数外面/开头加一个全局变量记录丢失的帧数
 lost_count = 0  
@@ -170,21 +171,21 @@ def camera_task():
                     current_enemy_offset = 0
                 else:   
                     pass
+            # 实战时注释
+            # # 绘制图像中心点
+            # frame_center = (frame.shape[1] // 2, frame.shape[0] // 2)
+            # cv2.circle(frame, frame_center, 5, (255, 0, 0), -1) # 画一个实心圆 (-1代表实心)：中心点，半径5，颜色(255, 0, 0)纯蓝
+            # cv2.putText(frame, "(0, 0)", frame_center, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2) # 在旁边写上文字 "(0, 0)"
 
-            # 绘制图像中心点
-            frame_center = (frame.shape[1] // 2, frame.shape[0] // 2)
-            cv2.circle(frame, frame_center, 5, (255, 0, 0), -1) # 画一个实心圆 (-1代表实心)：中心点，半径5，颜色(255, 0, 0)纯蓝
-            cv2.putText(frame, "(0, 0)", frame_center, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2) # 在旁边写上文字 "(0, 0)"
+            # for offset, tag in tag_offsets:
+            #     tag_id = tag.tag_id
+            #     if detector.classify_target(tag_id) > 0:
+            #         tag_center = tag.center.astype(int) # 计算标签中心
+            #         cv2.line(frame, frame_center, tuple(tag_center), (0, 255, 0), 2)  # 从画面中心，画一条绿色的线，连到标签中心
 
-            for offset, tag in tag_offsets:
-                tag_id = tag.tag_id
-                if detector.classify_target(tag_id) > 0:
-                    tag_center = np.mean(tag.corners, axis=0).astype(int)   # 计算标签中心
-                    cv2.line(frame, frame_center, tuple(tag_center), (0, 255, 0), 2)  # 从画面中心，画一条绿色的线，连到标签中心
-
-                # 把标签的 ID 和 偏移量数字，用黄色 (0, 255, 255) 写在标签旁边
-                cv2.putText(frame, f"ID: {tag_id}, Offset: ({offset[0]}, {offset[1]})", 
-                            tuple(tag.corners[0].astype(int)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+            #     # 把标签的 ID 和 偏移量数字，用黄色 (0, 255, 255) 写在标签旁边
+            #     cv2.putText(frame, f"ID: {tag_id}, Offset: ({offset[0]}, {offset[1]})", 
+            #                 tuple(tag.corners[0].astype(int)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
 
             cv2.imshow("Processed Frame", frame)
 
