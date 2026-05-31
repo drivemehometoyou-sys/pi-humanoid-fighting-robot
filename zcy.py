@@ -354,6 +354,7 @@ def rear_avoidance():
     reset_servos()
 #########################################################################################################
 
+# 起步
 def go_up_ramp():
     set_motor_speed(3800, 3400)
     time.sleep(0.8)  
@@ -364,13 +365,13 @@ def go_up_ramp():
     set_motor_speed(4000, 4000)
     time.sleep(1) 
 
-
+# 巡逻
 def patrol():
     global io_data
     global adc_data
     global obstacle_flag
     
-    if 0 in io_data[:8]:
+    if 0 in io_data[:8]:     # 红外防碰撞
         obstacle_flag = 1
         if io_data[0] == 0:
             set_motor_speed(100, 100)
@@ -396,9 +397,22 @@ def patrol():
         elif io_data[7] == 0:
             set_motor_speed(-250, 250)
             attack_light()
-    else:
+    else:                       # 
+        # if adc_data[0] + 25 < adc_data[1] and adc_data[1] < 585:
+        #     set_motor_speed(0, 800)
+        # else:
+        #     set_motor_speed(2000, 2000)
+        # ... 前面的 IO 避障代码保持不变 ...
+    
+        # 情况1：右轮踩线 (右边比左边黑得多) -> 左轮刹死，右轮推，向左急转
         if adc_data[0] + 25 < adc_data[1] and adc_data[1] < 585:
             set_motor_speed(0, 800)
+            
+        # 情况2：左轮踩线 (左边比右边黑得多) -> 右轮刹死，左轮推，向右急转
+        elif adc_data[1] + 25 < adc_data[0] and adc_data[0] < 585:
+            set_motor_speed(800, 0)
+            
+        # 情况3：两边都没踩线 (差值在安全死区 25 以内) -> 全速巡航找敌人
         else:
             set_motor_speed(2000, 2000)
     time.sleep(0.3)   
@@ -431,14 +445,14 @@ def timer_task():
     
     while True:
         if robot_state > 3:
-            main_counter += 1
-        if counter_1_flag == 1:
+            main_counter += 1   # 真实开战时间
+        if counter_1_flag == 1: # 战术秒表
             counter_1 += 1
-        time.sleep(0.1)
+        time.sleep(0.1)    # 定义了这个线程的“分辨率”
         
 
 def main():
-    ENEMY_ATTACK_AREA = 1000
+    ENEMY_ATTACK_AREA = 190
     
     global current_enemy_area
     global adc_data
@@ -510,14 +524,22 @@ def main():
     print("初始化完成")
     
     # 启动异步高频后台任务线程
-    t2 = threading.Thread(target=adc_update_task)     
-    t2.start()
-    t4 = threading.Thread(target=io_update_task)     
-    t4.start()
-    t6 = threading.Thread(target=camera_task)     
-    t6.start()
-    t9 = threading.Thread(target=timer_task)     
-    t9.start()
+    # 1. 底部灰度/巡线传感器感知线程
+    adc_thread = threading.Thread(target=adc_update_task, daemon=True)    
+    adc_thread.start()
+    
+    # 2. 周边红外避障/防跌落感知线程
+    io_thread = threading.Thread(target=io_update_task, daemon=True)    
+    io_thread.start()
+    
+    # 3. 视觉火控雷达线程
+    vision_thread = threading.Thread(target=camera_task, daemon=True)    
+    vision_thread.start()
+    
+    # 4. 全局心跳与生物钟线程
+    heartbeat_thread = threading.Thread(target=timer_task, daemon=True)    
+    heartbeat_thread.start()
+    
     time.sleep(1)
     
     # 配置底盘总线电机的运行模式
