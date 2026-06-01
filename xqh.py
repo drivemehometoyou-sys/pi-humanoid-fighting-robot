@@ -1,3 +1,4 @@
+#-*- coding: utf-8 -*-
 import cv2
 import numpy as np
 import threading
@@ -100,7 +101,7 @@ class Camera:
             threading.Thread(target=self.queryframe, args=()).start()
 
         except Exception as e:
-            print(f"摄像头打开失败: {e}")
+            print("摄像头打开失败: {}".format(e)) 
 
     def queryframe(self):
         """不断读取摄像头帧"""
@@ -148,7 +149,7 @@ def Camera_New():
                 ENER_FLAG=1
                 largest_enemy_offset1=largest_enemy_offset[0]
                 largest_enemy_area1=largest_enemy_area
-                print(f"最大敌方二维码的偏移量: {largest_enemy_offset}, 面积: {largest_enemy_area}")
+                print("最大敌方二维码的偏移量: {}, 面积: {}".format(largest_enemy_offset, largest_enemy_area))
             else:
                 ENER_FLAG=0
                 largest_enemy_offset1=0
@@ -165,7 +166,7 @@ def Camera_New():
                     tag_center = np.mean(tag.corners, axis=0).astype(int)
                     cv2.line(frame, frame_center, tuple(tag_center), (0, 255, 0), 2)
 
-                cv2.putText(frame, f"ID: {tag_id}, Offset: ({offset[0]}, {offset[1]})", tuple(tag.corners[0].astype(int)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+                cv2.putText(frame, "ID: {}, Offset: ({}, {})".format(tag_id, offset[0], offset[1]), tuple(tag.corners[0].astype(int)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
 
             cv2.imshow("Processed Frame", frame)
 
@@ -173,12 +174,13 @@ def Camera_New():
                 break
 
     except Exception as e:
-        print(f"发生错误: {e}")
+        print("发生错误: {}".format(e))
 
     finally:
         camera.close()
         cv2.destroyAllWindows()  # 确保关闭所有窗口
 
+        
 def read_io():
 
     global io_data
@@ -196,7 +198,7 @@ def io_update2():  #加入线程后数据更新模式
     while(1):
         read_io()
         time.sleep(0.05)
-
+        
 def GetIO():      #读取ADC口数据
     global ADC_DATA    ##设定全局变量
     # global io_data
@@ -224,7 +226,8 @@ def ADC_update():
         ADC_DATE[0]=ADC_DATE[0]+bias_F
         ADC_DATE[1]=ADC_DATE[1]+bias_B
         time.sleep(0.02)
-
+        
+        
 def MotorSetSpeed(left,right):  #设置左右电机速度，只能输入整数
     clc1.set_motor_speed(1, -left)
     time.sleep(0.03)
@@ -233,90 +236,346 @@ def MotorSetSpeed(left,right):  #设置左右电机速度，只能输入整数
     clc1.set_motor_speed(4, right)
     time.sleep(0.03)
     clc1.set_motor_speed(3, -left)
-    time.sleep(0.03)
-
+    time.sleep(0.03)   
+        
+        
 def MotorSpeed():
 
     while(1):
-        MotorSetSpeed(-500,500) 
-
-
-def GO_UP():
-    MotorSetSpeed(1000,800)
-    time.sleep(3)  
+        MotorSetSpeed(-500,500)
+def cds_chushi():    #
+    up.CDS_SetAngle(2,258,800) 
+    time.sleep(0.4) 
+    up.CDS_SetAngle(3,800,800)   
+    time.sleep(0.4) 
+    up.CDS_SetAngle(4,420,800)   
+    time.sleep(0.4) 
+    up.CDS_SetAngle(6,427,800) 
+    time.sleep(0.4) 
+    up.CDS_SetAngle(1,478,800)
+    time.sleep(0.4) 
+    up.CDS_SetAngle(5,553,800) 
+    time.sleep(0.4) 
+def Atack():
+    up.CDS_SetAngle(1,759,800)#大抬
+    up.CDS_SetAngle(5,302,800) 
+    time.sleep(0.3) 
+    up.CDS_SetAngle(4,836,800)   
+    up.CDS_SetAngle(6,822,800) 
+    time.sleep(0.3) 
+    up.CDS_SetAngle(2,213,800) 
+    up.CDS_SetAngle(3,840,800)    
+    time.sleep(0.3) 
+    up.CDS_SetAngle(1,650,800)#小抬
+    up.CDS_SetAngle(5,450,800) 
+    time.sleep(0.3)
+    MotorSetSpeed(-900,-900)
+    cds_chushi()
     MotorSetSpeed(0,0)
 
-def Patrol():
-    global ADC_DATE
-    if(ADC_DATE[0]<ADC_DATE[1]-10):
-        MotorSetSpeed(600,0)
-    else:
-        MotorSetSpeed(1200,1200)
-    time.sleep(0.3) 
+    
+def Atack_2():
 
+    up.CDS_SetAngle(5,200,800)#小抬
+    up.CDS_SetAngle(1,800,800) 
+    time.sleep(0.4) 
+    up.CDS_SetAngle(4,836,800)   
+    up.CDS_SetAngle(6,822,800) 
+    time.sleep(0.3) 
+    up.CDS_SetAngle(2,203,800) 
+    up.CDS_SetAngle(3,650,800)   
+    time.sleep(0.3) 
+    up.CDS_SetAngle(2,400,800) #da
+    up.CDS_SetAngle(3,853,800)    #xiao up.CDS_SetAngle(3,853,800)  
+    time.sleep(0.4) 
+
+    
+def Q_D():
+    MotorSetSpeed(0,0)
+    up.CDS_SetAngle(5,200,300)#小抬
+    up.CDS_SetAngle(1,800,300) 
+    time.sleep(0.4)
+    up.CDS_SetAngle(4,420,800)   
+    up.CDS_SetAngle(6,427,800) 
+    time.sleep(1.5) 
+    up.CDS_SetAngle(4,836,300)#小抬
+    up.CDS_SetAngle(6,822,300) 
+    time.sleep(1.5) 
+    up.CDS_SetAngle(1,584,300)#小抬
+    up.CDS_SetAngle(5,442,300) 
+    time.sleep(1.5) 
+    cds_chushi()
+
+    
+def H_D():
+
+    MotorSetSpeed(0,0)
+    up.CDS_SetAngle(2,868,300)#小抬
+    up.CDS_SetAngle(3,162,300) 
+    time.sleep(1.5) 
+    up.CDS_SetAngle(5,200,300)#小抬
+    up.CDS_SetAngle(1,800,300) 
+    time.sleep(0.4)
+    up.CDS_SetAngle(4,420,800)   
+    up.CDS_SetAngle(6,427,800) 
+    time.sleep(1.5) 
+    up.CDS_SetAngle(4,836,300)#小抬
+    up.CDS_SetAngle(6,822,300) 
+    time.sleep(1.5) 
+    up.CDS_SetAngle(1,584,300)#小抬
+    up.CDS_SetAngle(5,442,300) 
+    time.sleep(1.5) 
+    cds_chushi()
+    
+def GO_UP():
+    MotorSetSpeed(3800,3400)
+    time.sleep(0.8)  
+    MotorSetSpeed(3800,1800)
+    up.CDS_SetAngle(2,400,800) 
+    up.CDS_SetAngle(3,650,800)  
+    time.sleep(0.5)  
+    MotorSetSpeed(4000,4000)
+    time.sleep(1) 
+def Patrol():
+    global io_data
+    global ADC_DATE
+    global Flag
+    if(io_data[0]==0 or io_data[1]==0 or io_data[2]==0 or io_data[3]==0 or io_data[4]==0 or io_data[5]==0 or io_data[6]==0 or io_data[7]==0 ):
+        Flag=1
+        if(io_data[0]==0):
+            MotorSetSpeed(100,100)
+            Atack_2()
+        elif(io_data[4]==0):
+            MotorSetSpeed(-900,900)
+            Atack_2()
+        elif(io_data[3]==0):
+            MotorSetSpeed(900,-900)
+            Atack_2()
+        elif(io_data[5]==0):
+            MotorSetSpeed(-900,900)
+            Atack_2()
+        elif(io_data[2]==0):
+            MotorSetSpeed(750,-750)   
+            Atack_2()
+        elif(io_data[6]==0):
+            MotorSetSpeed(-750,750)
+            Atack_2()
+        elif(io_data[1]==0):
+            MotorSetSpeed(250,-250)
+            Atack_2()
+        elif(io_data[7]==0):
+            MotorSetSpeed(-250,250)
+            Atack_2()
+    else:
+        if(ADC_DATE[0]+25<ADC_DATE[1] and ADC_DATE[1]<585):
+            MotorSetSpeed(0,800)
+        else:
+            MotorSetSpeed(2000,2000)
+    time.sleep(0.3)   
+def GoFor_AP():    
+    global io_data
+    global largest_enemy_offset
+    global largest_enemy_area
+    global ENER_FLAG1
+    global largest_enemy_offset1
+    if   (largest_enemy_offset1<-100):
+        MotorSetSpeed(300,600)
+    elif(largest_enemy_offset1> 100 ):
+        MotorSetSpeed(600,300)
+    else:
+        if(io_data[0]==1 and io_data[1]==1 and io_data[7]==1):
+            MotorSetSpeed(2200,2200)
+        else:
+            MotorSetSpeed(400,400)
+
+        ENER_FLAG1=0
+
+    time.sleep(0.3)
+    
+def _TIM_():
+    global Counter
+    global Counter1
+    global Counter1_Flag
+    global Robot_State
+    while(True):
+        if(Robot_State>3):
+
+            Counter+=1
+        if(Counter1_Flag==1):
+
+            Counter1+=1
+        time.sleep(0.1)
+        
+        
 def main():
+    global up
+    up.__init__()
+    time.sleep(1)
+    up.CDS_Open()
+    time.sleep(1)
+    up.CDS_SetMode(1, 1)  # 设置电机 1 为电机模式
+    time.sleep(1)
+    up.CDS_SetMode(2, 1)  # 设置电机 2 为电机模式
+    global largest_enemy_area1
     global ADC_DATE
     global Robot_State
     global bias_F
     global bias_B
     global ENER_FLAG
+    global ENER_FLAG1
     global io_data
-    
-
+    global Flag
+    global Counter
+    global Counter1
+    global Counter1_Flag
+    global largest_enemy_offset1
+    global AP_Counter
     ADC_DATE=[0,0,0,0,0,0,0,0,0,0]
     io_data=[0,0,0,0,0,0,0,0,0,0]
     Robot_State=0
     bias_F=0
     bias_B=0
     ENER_FLAG=0
-    
-    
-    
-    up.__init__()
-    
-    
-    up.ADC_IO_Open()#打开adc io
-    up.CDS_Open()
-    up.MPU6500_Open()
+    ENER_FLAG1=0
+    Flag=0
+    Counter=0
+    Counter1=0
+    Counter1_Flag=0
+    AP_Counter=0
+    st.cds_init()
+    #电机初始化
+    clc1 = closed_loop_controller.ClosedLoopController()
     clc1.__init__()
+    time.sleep(0.1)
+    #IO初始化
+    up=uptech.UpTech()
+    up.__init__()
+    time.sleep(0.1)
+    up.ADC_IO_Open()
     
-     
-    t1 = threading.Thread(target=Camera_New)     
-    t1.start()
-    t2 = threading.Thread(target=ADC_update)     
-    t2.start()
-    t3 = threading.Thread(target=io_update2)     
-    t3.start()
-    #while(True):
+    #LED初始化
+    up.ADC_Led_SetColor(1,0X000000)
+    up.ADC_Led_SetColor(0,0X000000)
+    #LCD初始化
+    up.LCD_Open(2)
+    time.sleep(0.1)
+    up.ADC_IO_Open()
+    fore_color = up.COLOR_GREEN
+    back_color = up.COLOR_BLACK
+    #设置LCD字体背景颜色
+    up.LCD_SetForeColor(fore_color)
+    up.LCD_SetBackColor(back_color)
+    up.LCD_FillScreen(back_color)
+    up.LCD_SetFont(up.FONT_10X16)
+    time.sleep(0.1)
+    #光电管初始
+    cds_chushi()
+    cds_chushi()
+    time.sleep(0.5)
+    cds_chushi()
+    MotorSetSpeed(0,0)
+    print("初始化完成")
+    
+    
+    
+    # t2 = threading.Thread(target=ADC_update)     
+    # t2.start()
+    # t4 = threading.Thread(target=io_update2)     
+    # t4.start()
+    # t6 = threading.Thread(target=Camera_New)     
+    # t6.start()
+    # t9 = threading.Thread(target=_TIM_)     
+    # t9.start()
+    time.sleep(1)
+    cds_chushi()
+    time.sleep(1)
+    up.CDS_SetMode(1,1)
+    time.sleep(1)
+    up.CDS_SetMode(2,1)
+    time.sleep(1)
+    # while(True):
+    #    Atack()
+    #    up.CDS_SetSpeed(1, 500)  # 设置电机1速度为500
+    #    time.sleep(0.3)
+    #    up.CDS_SetSpeed(2, 500)  # 如果你也想让电机2转动
+    #    time.sleep(10)
+    #    print('1 is {:.1f}'.format(Counter))
+    #    print('1 is {:.1f},2 is {:.1f}'.format(ADC_DATE[2],ADC_DATE[3]))
+    #    print('1 is {:.1f},2 is {:.1f},3 is {:.1f},4 is {:.1f},5 is {:.1f},6 is {:.1f}'.format(io_data[0],io_data[1],io_data[2],io_data[3],io_data[4],io_data[5]))
+    # while(True):
+    #    Atack_2()
+    
     #    print('1 is {:.1f},2 is {:.1f},3 is {:.1f},4 is {:.1f},5 is {:.1f},6 is {:.1f}'.format(up.CDS_GetCurPos(1),up.CDS_GetCurPos(2),up.CDS_GetCurPos(3),up.CDS_GetCurPos(4),up.CDS_GetCurPos(5),up.CDS_GetCurPos(6)))
-    while(True):
-        print('the ADC1 is {:.1f},the ADC2 is {:.1f}'.format(ADC_DATE[0],ADC_DATE[1]))
+    while True:
+        print("运行中")
+        up.CDS_SetSpeed(1, 500)  # 设置电机1速度为500
+        time.sleep(0.3)
+        up.CDS_SetSpeed(2, 500)  # 如果你也想让电机2转动
+        time.sleep(10)
+        #print('the ADC1 is {:.1f},the ADC2 is {:.1f}'.format(ADC_DATE[0],ADC_DATE[1]))
+        if(Robot_State>3 and Counter>30 and (ADC_DATE[2]<1000 or ADC_DATE[3]<1000)):
+            Robot_State=6
+            time.sleep(0.1)
+            if(ADC_DATE[2]<1000):
+                Q_D()
+            elif(ADC_DATE[3]<1000):
+                H_D()
+        if(Robot_State==6 and Counter>30 and (ADC_DATE[2]>1000 and ADC_DATE[3]>1000)):
+            Robot_State=4
+
+                
+        if  (Robot_State==5 and ENER_FLAG==0 and Counter>30):
+            MotorSetSpeed(0,0)
+            time.sleep(0.3)
+            if(ENER_FLAG==0):
+                print("l_AP")
+                print('1 is {:.1f}'.format(Counter))
+
+                if(ENER_FLAG==0):
+                    AP_Counter=0
+                    Atack()
+                    MotorSetSpeed(-1400,-1400)
+                    cds_chushi()
+                    up.CDS_SetAngle(1,478,800)
+                    up.CDS_SetAngle(5,553,800) 
+                    time.sleep(0.3) 
+                    MotorSetSpeed(0,0)
+                    time.sleep(0.3)
+                if(ENER_FLAG==0):
+                    Robot_State=4
+        if(Robot_State<=3):
+            print('1 is {:.1f},2 is {:.1f}'.format(ADC_DATE[0],ADC_DATE[1]))
         if  (io_data[2] == 0 and io_data[6] == 0 and Robot_State==0):
             Robot_State=1
             print("Ready for calibration")
-            time.sleep(3)
+            time.sleep(1)
 
         if  (io_data[2] == 0 and io_data[6] == 0 and Robot_State==1):
             Robot_State = 2
             print("calibration")
-            time.sleep(3)
+            time.sleep(1)
             
         if  (io_data[2] == 0 and io_data[6] == 0 and Robot_State==2):
             Robot_State = 3
             print("Done of calibration")
-            time.sleep(3)
+            time.sleep(1)
         if  (io_data[2] == 0 and io_data[6] == 0 and Robot_State==3):
             Robot_State = 4
             print("Up")
             GO_UP()
+        if  (ENER_FLAG==1 and Robot_State > 3 and largest_enemy_area1>190):
+            Robot_State=5
+            if(Flag==1):
+                MotorSetSpeed(0,0)
+                cds_chushi()
+                Flag=0
+            GoFor_AP()
+        elif  (ENER_FLAG==1 and Robot_State > 3 and largest_enemy_area1<190):
+            Robot_State=4
         if  (Robot_State == 4):
+            print('1 is {:.1f},2 is {:.1f}'.format(ADC_DATE[0],ADC_DATE[1]))
             Patrol()
             print("Patrol")
-        if  (ENER_FLAG==1):
-            Robot_State=5
-            GoFor_AP()
-        if  (Robot_State==5 and ENER_FLAG==0):
-            Robot_State=4
 
 
         
@@ -325,6 +584,3 @@ def main():
 if __name__ == "__main__":
     main()  # 执行主函数
 ####################
-
-
- 

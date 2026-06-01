@@ -506,70 +506,70 @@ def main():
         time.sleep(0.3)
         up.CDS_SetSpeed(2, 500)  # 如果你也想让电机2转动
         time.sleep(10)
-        # #print('the ADC1 is {:.1f},the ADC2 is {:.1f}'.format(ADC_DATE[0],ADC_DATE[1]))
-        # if(Robot_State>3 and Counter>30 and (ADC_DATE[2]<1000 or ADC_DATE[3]<1000)):
-        #     Robot_State=6
-        #     time.sleep(0.1)
-        #     if(ADC_DATE[2]<1000):
-        #         Q_D()
-        #     elif(ADC_DATE[3]<1000):
-        #         H_D()
-        # if(Robot_State==6 and Counter>30 and (ADC_DATE[2]>1000 and ADC_DATE[3]>1000)):
-        #     Robot_State=4
+        #print('the ADC1 is {:.1f},the ADC2 is {:.1f}'.format(ADC_DATE[0],ADC_DATE[1]))
+        if(Robot_State>3 and Counter>30 and (ADC_DATE[2]<1000 or ADC_DATE[3]<1000)):
+            Robot_State=6
+            time.sleep(0.1)
+            if(ADC_DATE[2]<1000):
+                Q_D()
+            elif(ADC_DATE[3]<1000):
+                H_D()
+        if(Robot_State==6 and Counter>30 and (ADC_DATE[2]>1000 and ADC_DATE[3]>1000)):
+            Robot_State=4
 
                 
-        # if  (Robot_State==5 and ENER_FLAG==0 and Counter>30):
-        #     MotorSetSpeed(0,0)
-        #     time.sleep(0.3)
-        #     if(ENER_FLAG==0):
-        #         print("l_AP")
-        #         print('1 is {:.1f}'.format(Counter))
+        if  (Robot_State==5 and ENER_FLAG==0 and Counter>30):
+            MotorSetSpeed(0,0)
+            time.sleep(0.3)
+            if(ENER_FLAG==0):
+                print("l_AP")
+                print('1 is {:.1f}'.format(Counter))
 
-        #         if(ENER_FLAG==0):
-        #             AP_Counter=0
-        #             Atack()
-        #             MotorSetSpeed(-1400,-1400)
-        #             cds_chushi()
-        #             up.CDS_SetAngle(1,478,800)
-        #             up.CDS_SetAngle(5,553,800) 
-        #             time.sleep(0.3) 
-        #             MotorSetSpeed(0,0)
-        #             time.sleep(0.3)
-        #         if(ENER_FLAG==0):
-        #             Robot_State=4
-        # if(Robot_State<=3):
-        #     print('1 is {:.1f},2 is {:.1f}'.format(ADC_DATE[0],ADC_DATE[1]))
-        # if  (io_data[2] == 0 and io_data[6] == 0 and Robot_State==0):
-        #     Robot_State=1
-        #     print("Ready for calibration")
-        #     time.sleep(1)
+                if(ENER_FLAG==0):
+                    AP_Counter=0
+                    Atack()
+                    MotorSetSpeed(-1400,-1400)
+                    cds_chushi()
+                    up.CDS_SetAngle(1,478,800)
+                    up.CDS_SetAngle(5,553,800) 
+                    time.sleep(0.3) 
+                    MotorSetSpeed(0,0)
+                    time.sleep(0.3)
+                if(ENER_FLAG==0):
+                    Robot_State=4
+        if(Robot_State<=3):
+            print('1 is {:.1f},2 is {:.1f}'.format(ADC_DATE[0],ADC_DATE[1]))
+        if  (io_data[2] == 0 and io_data[6] == 0 and Robot_State==0):
+            Robot_State=1
+            print("Ready for calibration")
+            time.sleep(1)
 
-        # if  (io_data[2] == 0 and io_data[6] == 0 and Robot_State==1):
-        #     Robot_State = 2
-        #     print("calibration")
-        #     time.sleep(1)
+        if  (io_data[2] == 0 and io_data[6] == 0 and Robot_State==1):
+            Robot_State = 2
+            print("calibration")
+            time.sleep(1)
             
-        # if  (io_data[2] == 0 and io_data[6] == 0 and Robot_State==2):
-        #     Robot_State = 3
-        #     print("Done of calibration")
-        #     time.sleep(1)
-        # if  (io_data[2] == 0 and io_data[6] == 0 and Robot_State==3):
-        #     Robot_State = 4
-        #     print("Up")
-        #     GO_UP()
-        # if  (ENER_FLAG==1 and Robot_State > 3 and largest_enemy_area1>190):
-        #     Robot_State=5
-        #     if(Flag==1):
-        #         MotorSetSpeed(0,0)
-        #         cds_chushi()
-        #         Flag=0
-        #     GoFor_AP()
-        # elif  (ENER_FLAG==1 and Robot_State > 3 and largest_enemy_area1<190):
-        #     Robot_State=4
-        # if  (Robot_State == 4):
-        #     print('1 is {:.1f},2 is {:.1f}'.format(ADC_DATE[0],ADC_DATE[1]))
-        #     Patrol()
-        #     print("Patrol")
+        if  (io_data[2] == 0 and io_data[6] == 0 and Robot_State==2):
+            Robot_State = 3
+            print("Done of calibration")
+            time.sleep(1)
+        if  (io_data[2] == 0 and io_data[6] == 0 and Robot_State==3):
+            Robot_State = 4
+            print("Up")
+            GO_UP()
+        if  (ENER_FLAG==1 and Robot_State > 3 and largest_enemy_area1>190):
+            Robot_State=5
+            if(Flag==1):
+                MotorSetSpeed(0,0)
+                cds_chushi()
+                Flag=0
+            GoFor_AP()
+        elif  (ENER_FLAG==1 and Robot_State > 3 and largest_enemy_area1<190):
+            Robot_State=4
+        if  (Robot_State == 4):
+            print('1 is {:.1f},2 is {:.1f}'.format(ADC_DATE[0],ADC_DATE[1]))
+            Patrol()
+            print("Patrol")
 
 
         

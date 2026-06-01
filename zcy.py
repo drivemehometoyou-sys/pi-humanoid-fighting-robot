@@ -97,12 +97,12 @@ class AprilTagDetector:
             return 2  # 友方
         return 0  # 未识别
 
-    def draw_bounding_box(self, frame, tag):
-        """在图像上框出二维码"""
-        # 1. 提取出 4 个角点坐标，并确保它们是整数（画图不能在半个像素上画）
-        corners = tag.corners.astype(int)
-        # 2. 调用 OpenCV 的画多边形函数
-        cv2.polylines(frame, [corners], isClosed=True, color=(0, 255, 0), thickness=2)
+    # def draw_bounding_box(self, frame, tag):
+    #     """在图像上框出二维码"""
+    #     # 1. 提取出 4 个角点坐标，并确保它们是整数（画图不能在半个像素上画）
+    #     corners = tag.corners.astype(int)
+    #     # 2. 调用 OpenCV 的画多边形函数
+    #     cv2.polylines(frame, [corners], isClosed=True, color=(0, 255, 0), thickness=2)
 
     def get_largest_enemy_tag_info(self, tags):
         """获取面积最大的敌方二维码的偏移量和面积"""
@@ -144,7 +144,7 @@ def camera_task():
     current_enemy_area = 0
     
     try:
-        camera.open()
+        camera.open()    # 开启摄像机线程
         threading.Event().wait(1)
         while True:
             ret, frame = camera.get_frame()
@@ -187,7 +187,7 @@ def camera_task():
             #     cv2.putText(frame, f"ID: {tag_id}, Offset: ({offset[0]}, {offset[1]})", 
             #                 tuple(tag.corners[0].astype(int)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
 
-            cv2.imshow("Processed Frame", frame)
+            cv2.imshow("Processed Frame", frame)  # 实战部署时注释
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
@@ -444,7 +444,8 @@ def timer_task():
     global robot_state
     
     while True:
-        if robot_state > 3:
+        # if robot_state > 3:
+        if robot_state >= 4:
             main_counter += 1   # 真实开战时间
         if counter_1_flag == 1: # 战术秒表
             counter_1 += 1
@@ -553,7 +554,8 @@ def main():
     # 核心有限状态机控制闭环
     while True:
         # 【安全与边界限制机制】
-        if robot_state > 3 and main_counter > 30 and (adc_data[2] < 1000 or adc_data[3] < 1000):
+        # if robot_state > 3 and main_counter > 30 and (adc_data[2] < 1000 or adc_data[3] < 1000):
+        if robot_state >= 4 and main_counter > 30 and (adc_data[2] < 1000 or adc_data[3] < 1000):
             robot_state = 6
             time.sleep(0.1)
             if adc_data[2] < 1000:
@@ -605,21 +607,41 @@ def main():
             print("Calibration done")
             time.sleep(1)
             
-        # 标定完全通过，触发 go_up_ramp 正式切入战局状态 4
+        # # 标定完全通过，触发 go_up_ramp 正式切入战局状态 4
+        # if io_data[2] == 0 and io_data[6] == 0 and robot_state == 3:
+        #     robot_state = 4
+        #     print("Up and Start")
+        #     go_up_ramp()
+        
+        # 修改为：按下按键后，进入 3.5 视觉待命状态
         if io_data[2] == 0 and io_data[6] == 0 and robot_state == 3:
-            robot_state = 4
-            print("Up and Start")
-            go_up_ramp()
+            robot_state = 3.5  
+            set_motor_speed(0, 0) # 确保底盘死区刹车
+            print("【进入状态 3.5】视觉待命，请将标签贴近摄像头启动...")
+            time.sleep(1) # 防抖
+
+        # 【新增】状态 3.5 专属逻辑：检测大面积标签起步
+        if robot_state == 3.5:
+            # 启动面积阈值（非常大，代表“贴脸”）。
+            # 你的镜头是 640x320，这个阈值需要你实测一下，建议设在 15000 到 30000 之间
+            START_SIGNAL_AREA = 20000 
             
+            if enemy_flag == 1 and current_enemy_area > START_SIGNAL_AREA:
+                print(f"【接收到启动指令】当前标签面积: {current_enemy_area}")
+                robot_state = 4  # 彻底切入常规巡航状态
+                print("Up and Start - Go up ramp!")
+                go_up_ramp()     # 执行起步冲坡动作
+
         # 【视觉目标追踪条件判定】
-        if enemy_flag == 1 and robot_state > 3 and current_enemy_area > ENEMY_ATTACK_AREA:
+        # if enemy_flag == 1 and robot_state > 3 and current_enemy_area > ENEMY_ATTACK_AREA:
+        if enemy_flag == 1 and robot_state >= 4 and current_enemy_area > ENEMY_ATTACK_AREA:
             robot_state = 5  
             if obstacle_flag == 1:
                 set_motor_speed(0, 0)
                 reset_servos()
                 obstacle_flag = 0
             track_apriltag()  
-        elif enemy_flag == 1 and robot_state > 3 and current_enemy_area < ENEMY_ATTACK_AREA:
+        elif enemy_flag == 1 and robot_state >= 4 and current_enemy_area < ENEMY_ATTACK_AREA:
             robot_state = 4  
 
         # 【状态4：常规路线寻迹巡航】
